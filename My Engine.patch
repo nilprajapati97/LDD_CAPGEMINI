@@ -1,0 +1,99 @@
+delete mode -
+
+GUI - Basically Java Layer and from our team Abhijit Is handling
+
+Server Layer -: GUI process, PP Process ,
+			It create 2 instance ,
+				Capture Instance, Decoding instance,
+				
+STT Code Capture inatnce	-: TCP IP Protocol, SOCKET
+
+  -- Server Layer -: STT GUI Process
+===================================================================================================================================================================  
+  When you start STT GUI Process, It will create 2 STT Core instance 
+		Capture Instance - STT Core Instance
+		decoding Instance - STT Core Instance
+	They will be communicating Server (GUI) using TCP IP protocol using socket connection
+	
+	==
+	Lets Assume User clicks on start capture button
+	At that time STT GUI send JSON command throught socket connection to the STT core capture instance Saying that user has requested start capture .
+	  
+	STT code handling commands acordingly it will start captring data and process data And store into session databased.
+	
+	Now -: STT core Decoding instance pickup the data if we have enabled Automatic decoding
+	
+	Lets assume that we have not enabled 
+		STT decoding instacne will not doing anything here.
+	Now Wen it comes into picture-:
+		I have imported a file and process is completed.And after imporing file manually load decoders then at that time STT core decodding comes into picture-	
+			It will start decoding session database the each msg in session it will apply associated decoder and it will send information to GUI.
+			
+		Note -: even if we apply decoder here we do not write decoder information to a database. The decoding information only displyed into GUI.
+		For Example- : We imported file, Applyed decoders, Now close the session. And if re open the session data will not decoded. To decode that data we need to re applu decoders.
+		            -: Thats why STT Decoding instance only read from database.
+==========================================================================================================================
+STT -: Capture Instance -:
+	  Very 1st
+		Capture service API and Execution thread-:
+			--: when user interact, GUI will send commands in JSON from to the backend, Now the backend will process the command using the execution thread.
+			    And that will trigger Engine Capture service.
+				
+			Lets -: Suppose user start capture, STT GUI ask Start capture instance to capture data.
+					And Assuming that all connection and configuration properly done by user.
+					The flow will start from here from the modem. we have different data interface USB, PCI, SOCKET interface.
+					Here we are using socket to read the data.They will start reading data from the modem.
+					
+					After reading the data will store into circular buffer. now circular bufffer shared between capture Thread and store thread.
+					So capture thread keep reading the datta and pushing into circular bufffer and store thread will check there is data to write.
+					Job of Store Thread-:
+							It will check if there is data available then it will write to ISTP file. So this is how an ISTP file created.
+					
+					So whatever file we staored ISTP file that is Raw ISTP file. There is no processing untill this point.
+					
+					Now STT Side procesing comes here. Import thered comes into picture-	
+						
+					->Importing thread can be done in two ways:
+						1.Live capture
+						2.Import ISTP file
+						-> In both the ways the input file will be the raw ISTP file
+						-> In live capture, ISTP file will be created by store thread
+						-> In import thread file location has to be provide manually to import file directly.
+						
+					Import Thread-:
+					Job -: To stream detection part
+						->Import thread do stream detection
+						- For platform 7660 the stream type is STPv2
+						-> 7560 & 7660 are different type of modems (Different version of Modem) (Variation of modem)
+						-> but 7660 version using STPv2 because there is an upgrade in the protocol.
+						-> For platform 7560 & earlier the stream type is ISTP file
+						-> To detect different formats of files we designed stream detection to know what kind of data we are receiving
+						-> The extension of STPv2 file is .istp but the format will be different.
+
+	STREAM Decoding-:	
+		
+					
+					
+					
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+					
+					
+		
+	
+	
+		
+
